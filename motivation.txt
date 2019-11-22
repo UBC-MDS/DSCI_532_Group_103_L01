@@ -1,0 +1,14 @@
+United states have a high population of immigrants mostly 
+from Asia who constitutes on of the largest workforce in the 
+country.  
+The newly elected Republican goverment headed by Mr. Donald
+Trump promised to jobs to americans only. So the americans communities
+felt immigrants communities are the reason for the high 
+unemployment rate in the country. This led to a surge
+in reports of [hate crimes](https://en.wikipedia.org/wiki/Hate_crime)
+as per media reports. We liked to verify this report of media
+and also the causes of these crimes. The dashboard app tries to find 
+out the relation between several factors like income, unemployment,
+etc. with the recent hate crime records.The app has several filters and drop-down menus for filtering and 
+ordering the data. Here we just explore our data with visualizations
+and leave the conclusion to the viewer/user. 
