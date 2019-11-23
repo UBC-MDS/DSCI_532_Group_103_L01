@@ -19,4 +19,4 @@ The second tab shows the correlation between each potential factor and the hate 
 <img src='imgs/Tab2.jpg' width = 800, height = 700>
 
 
-***Note** - *This app is build using Dash which supports code in Python and R.*
+**Note** - *This app is build using Dash which supports code in Python and R.*
