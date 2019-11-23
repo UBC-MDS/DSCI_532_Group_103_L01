@@ -1,0 +1,6 @@
+ [Hate crimes](https://en.wikipedia.org/wiki/Hate_crime) in the US has been the talking point in media lately. 
+In a country like the United States with large numbers of immigrant population, this is a major concern for the authorities. We have analysed past 
+hate crime data and tried to delve deeper into the causes of these crimes. Our dashboard app tries to find out the relation between demographics data of 
+income, unemployment, education, etc. with hate crime records. Firstly, we tried to identify the distribution of hate crimes across US
+states and various factors which might affect the crime rate. Secondly, our app will also show the differences caused by the US general elections of 2016 
+across the hate crime rates.
