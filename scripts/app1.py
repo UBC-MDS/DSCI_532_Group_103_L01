@@ -22,7 +22,7 @@ def chart1():
         return {
             "config": {
                 "title": {
-                    "fontSize": 24,
+                    "fontSize": 18,
                     "font": font,
                     "anchor": "start", # equivalent of left-aligned.
                     "fontColor": "#000000"
@@ -53,7 +53,7 @@ def chart1():
                     "gridColor": gridColor,
                     "gridWidth": 1,
                     "labelFont": font,
-                    "labelFontSize": 14,
+                    "labelFontSize": 12,
                     "labelAngle": 0, 
                     #"ticks": False, # even if you don't have a "domain" you need to turn these off.
                     "titleFont": font,
@@ -89,8 +89,8 @@ def chart1():
             from_=alt.LookupData(hate_crime, 'id', ['avg_hatecrimes_per_100k_fbi','state'])
         ).project('albersUsa').properties(
             title='Average hate crimes per 100K population in each state',
-            width=650,
-            height=400)
+            width=550,
+            height=300)
     
     return p1 
 
@@ -110,10 +110,16 @@ def chart2(x_val = 'gini_index'):
 
     poly_data[str(degree)] = np.poly1d(np.polyfit(df['x'], df['y'], degree))(poly_data['xfit'])
 
+    type_dict = {'gini_index': 'Income Disparity',
+                'share_unemployed_seasonal': 'Unemployment rate seasonal',
+                'share_white_poverty': 'White people poverty rate',
+                'share_non_citizen': 'Percentage of Non-citizens',
+                'share_population_in_metro_areas': 'Percentage of people in metro cities'}
+                
     # Plot the data points on an interactive axis
     points = alt.Chart(df).mark_circle(color='black', size = 40, opacity = 0.6).encode(
-        x=alt.X('x:Q', title=x_val, scale = alt.Scale(domain = [min(df['x']),max(df['x'])])),
-        y=alt.Y('y:Q', title='Average annual hate crime per 100K people'),
+        x=alt.X('x:Q', title=type_dict[x_val], scale = alt.Scale(domain = [min(df['x']),max(df['x'])])),
+        y=alt.Y('y:Q', title='Average hate crime per 100K people'),
         tooltip = 'state:O'
     )
 
@@ -123,12 +129,10 @@ def chart2(x_val = 'gini_index'):
         y='1:Q'
     )
     
-    return points + polynomial_fit
+    return (points + polynomial_fit).properties(title = 'Hate crime rate across demographic factors', width = 450, height = 250)
 
 
-app.layout = html.Div([
-
-    
+app.layout = html.Div([ 
     ### Add Tabs to the top of the page
     dcc.Tabs(id='tabs', value='tab1', children=[
         dcc.Tab(label='Hate Crimes on Average', value='tab-1'),
@@ -136,8 +140,6 @@ app.layout = html.Div([
     ]),    
 
     html.Div(id='tabs-content-example')
-
-        
 ])
 
 
@@ -146,47 +148,48 @@ app.layout = html.Div([
 def render_content(tab = 'tab-1'):
     if tab == 'tab-1':
         return html.Div([
-
-            html.H2('Here is our first plot:'),
-            html.Iframe(
-                sandbox='allow-scripts',
-                id='plot1',
-                height='500',
-                width='1000',
-                style={'border-width': '0'},
-                ################ The magic happens here
-                srcDoc = chart1().to_html()
-                ################ The magic happens here
-                ),
-
-            html.H2('Here is our second plot:'),
-
-            html.H3('Choose the x -axis:'),
-            dcc.Dropdown(
-                id = 'dd-chart',
-                options = [
-                    {'label': 'Income Disparity', 'value': 'gini_index'},
-                    {'label': 'Unemployment rate seasonal', 'value': 'share_unemployed_seasonal'},
-                    {'label': 'White people poverty rate', 'value': 'share_white_poverty'},
-                    {'label': 'Percentage of Non-citizens', 'value': 'share_non_citizen'},
-                    {'label': 'Percentage of people in metro cities', 'value': 'share_population_in_metro_areas'}
-                ],
-                value = 'gini_index',
-                style=dict(width = '45%',
-                            verticalAlign="middle")
+            html.H2('Analysis of Hate crime rates across demographic factors', 
+            style={'font-family':'ariel,serif','font-size':'32px'}),
+            html.Div([ 
+                html.Iframe(
+                    sandbox='allow-scripts',
+                    id='plot1',
+                    height='500',
+                    width='1000',
+                    style={'border-width':'0'},
+                    ################ The magic happens here
+                    srcDoc = chart1().to_html()
+                    ################ The magic happens here
+                    )],
+                    style={'display': 'inline-block', 'width': '55%', 'border-width':'0'}
             ),
-
-            html.Div(id='dd-output'),
-            html.Iframe(
-                sandbox='allow-scripts',
-                id='chart2',
-                height='500',
-                width='1000',
-                style={'border-width': '0'},
-                ################ The magic happens here
-                srcDoc = chart2().to_html()
-                ################ The magic happens here
-            )         
+            html.Div([
+                html.H4('Choose the demographic factor on x -axis:'),
+                dcc.Dropdown(
+                    id = 'dd-chart',
+                    options = [
+                        {'label': 'Income Disparity', 'value': 'gini_index'},
+                        {'label': 'Unemployment rate seasonal', 'value': 'share_unemployed_seasonal'},
+                        {'label': 'White people poverty rate', 'value': 'share_white_poverty'},
+                        {'label': 'Percentage of Non-citizens', 'value': 'share_non_citizen'},
+                        {'label': 'Percentage of people in metro cities', 'value': 'share_population_in_metro_areas'}
+                    ],
+                    value = 'gini_index',
+                    style=dict(width = '70%',
+                                verticalAlign="middle")
+                ),
+                html.Iframe(
+                    sandbox='allow-scripts',
+                    id='chart2',
+                    height='500',
+                    width='1000',
+                    style={'border-width': '0'},
+                    ################ The magic happens here
+                    srcDoc = chart2().to_html()
+                    ################ The magic happens here
+                )],
+                style= {'display': 'inline-block','width': '45%', 'border-width':'0'}
+            )             
         ])
     elif tab == 'tab-2':
         return html.Div([
