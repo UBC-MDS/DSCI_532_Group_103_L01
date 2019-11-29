@@ -24,7 +24,7 @@ def chart1():
         return {
             "config": {
                 "title": {
-                    "fontSize": 16,
+                    "fontSize": 14,
                     "font": font,
                     "anchor": "start", # equivalent of left-aligned.
                     "fontColor": "#000000"
@@ -131,7 +131,7 @@ def chart2(x_val = 'gini_index'):
         y='1:Q'
     )
     
-    return (points + polynomial_fit).properties(title = 'Hate crime rate across socio-economic factors', width = 450, height = 300)
+    return (points + polynomial_fit).properties(title = 'Hate crime rate across socio-economic factors', width = 400, height = 300)
 def graph3_4():
 
     crime_data = pd.read_csv('..\data\hate_crimes.csv')
@@ -158,19 +158,19 @@ def graph3_4():
 
     # Create the plots
 
-    l = alt.Chart(crime_data_n, title = "States with low baseline crime rate").mark_bar().encode(
+    l = alt.Chart(crime_data_n, title = "Rate of change of hate crimes across states with low baseline").mark_bar().encode(
             alt.X('state:N', title = '', axis=alt.Axis(labelAngle = -45)),
-            alt.Y('prop:Q', title = 'Rate of change of hate crime pre and post election'),
+            alt.Y('prop:Q', title = 'Rate of change'),
             color=alt.condition(state_selector, alt.ColorValue("steelblue"), alt.ColorValue("grey"))
         ).transform_filter((datum.crime_rate_bracket == 'low baseline crime rate')).properties(width = 475,height = 200)
 
-    h = alt.Chart(crime_data_n, title = "States with high baseline crime rate").mark_bar().encode(
+    h = alt.Chart(crime_data_n, title = "Rate of change of hate crimes across states with high baseline").mark_bar().encode(
             alt.X('state:N', axis=alt.Axis(labelAngle = -45),  title = ''),
-            alt.Y('prop:Q', title = 'Rate of change of hate crime pre and post election', scale=alt.Scale(domain=[0, 30])),
+            alt.Y('prop:Q', title = 'Rate of change', scale=alt.Scale(domain=[0, 30])),
             color=alt.condition(state_selector, alt.ColorValue("steelblue"), alt.ColorValue("grey"))
         ).transform_filter((datum.crime_rate_bracket == 'high baseline crime rate')).properties(width = 450,height = 200)
 
-    heatmap = alt.Chart(crime_data_sorted_trump).mark_rect().encode(
+    heatmap = alt.Chart(crime_data_sorted_trump, title = 'Change in hate crime rate with voting trend during 2016 U.S. elections').mark_rect().encode(
         alt.X('state', sort=None, title=" ", axis=alt.Axis(labelAngle = -45)),
         alt.Y('share_voters_voted_trump', title="Share of Trump voters (%)"),
         alt.Color('diff_hatecrime', title="Change in hate crime rate (%)", scale = alt.Scale(scheme='orangered')),
@@ -193,11 +193,12 @@ tabs_styles = {
 tab_selected_style = {
     'borderTop': '1px solid #d6d6d6',
     'padding-left': '5px',
-    'padding-bottom': '10px',
-    
+    'padding-bottom': '100px',  
 }
 
-footer = dbc.Container([dbc.Row(dbc.Col(html.P('* Click on the bars to view the corresponding values'))),
+footer = dbc.Container([dbc.Row(dbc.Col(dcc.Markdown('''*Note - States have been divided on the basis of average pre-election hate \
+    crime rates into low and high categories. Click on the bars to top graph to explore which baseline category \
+    the state lies in.*''', style = {'font-size': '12px'}))),
                         ])
 
 app.layout = html.Div([ 
@@ -205,7 +206,7 @@ app.layout = html.Div([
     
     html.Div([dbc.Jumbotron([
                 dbc.Container([
-                      html.H2("Hate crime analysis app"),
+                      html.H2("U.S. hate crime analysis"),
                       dcc.Markdown('''
                     - Explore the relationship between potential demographic factors (income, unemployment, education, etc)  and hate crime rates
                     
@@ -237,8 +238,12 @@ def render_content(tab = 'tab-1'):
             html.H2('Analysis of U.S hate crime rates from 2010-2015 ',
                     style={'font-family':'arial','font-size':'20px', 'padding-left':'400px', 'padding-top':'50px'}),
             
-            html.P('The hate crimes are not evenly distributed across all the states in the U.S. Some states have much higher rates than others. This brings up a question that whether there are some factors asscoiated with the occurence of hate crimes. The analysis in this  section will help to approach this question.',
-                   style={'font-family':'arial','font-size':'16px', 'padding-left':'100px','padding-bottom':'40px',  'color':'black'}),
+            html.P('The hate crimes are not evenly distributed across all the states in the U.S. \
+            Some states have much higher rates than others. This brings up a question that whether \
+            there are some factors asscoiated with the occurence of hate crimes. The analysis in this \
+                section will help to approach this question.',
+                   style={'font-family':'arial','font-size':'16px', 'padding-left':'100px','padding-bottom':'40px',\
+                        'color':'black'}),
 
             html.Div([ 
                 html.Iframe(
@@ -258,12 +263,14 @@ def render_content(tab = 'tab-1'):
                     sandbox='allow-scripts',
                     id='chart2',
                     height='400',
-                    width='565',
+                    width='550',
                     style={'border-width': '0'},
                     ################ The magic happens here
                     srcDoc = chart2().to_html()
                     ################ The magic happens here
                 ),
+                html.Div('Select factor for x-axis', 
+                        style={'font-family':'arial','font-size':'12px','color':'black'}),
                dcc.Dropdown(
                     id = 'dd-chart',
                     options = [
@@ -278,25 +285,29 @@ def render_content(tab = 'tab-1'):
                                 verticalAlign="middle")
                 )],
                 style= {'display': 'inline-block','width': '42%','height': '30px', 'border-width':'0'}
-            )             
+            )            
         ], style = tab_selected_style)
     elif tab == 'tab-2':
         return html.Div([
-                    html.H2('Change in hate crime rate with voting trend in 2016 U.S. election',
+                    html.H2('Impact of 2016 U.S. elections on hate crimes',
                     style={'font-family':'arial','font-size':'20px', 'padding-left':'400px', 'padding-top':'50px'}),
-                    html.P('Summary',
-                    style={'font-family':'arial','font-size':'16px', 'padding-left':'100px','padding-bottom':'40px',  'color':'black'}),            
+                    html.P('Big fluctuations in the hate crime rates have been observed after the U.S. president election in 2016. \
+                        It is tempting to think that the election may have substantial impact on these rates. However, before any \
+                        conclusion can be made, it needs to be evaluated whether these changes were impacted by a state\'s voting trend',
+                    style={'font-family':'arial','font-size':'16px', 'padding-left':'100px','padding-bottom':'40px',  \
+                        'color':'black'}),            
                     html.Iframe(
                         sandbox='allow-scripts',
                         id='plot',
-                        height='1000',
+                        height='700',
                         width='1300',
                         style={'border-width': '0'},
                         ################ The magic happens here
                         srcDoc=graph3_4().to_html()
                         ################ The magic happens here
-                    )    
-        ], style = tab_selected_style)
+                    ),
+                    footer    
+        ],style = {'borderTop': '1px solid #d6d6d6','padding-left':'5px'})
 
 
 @app.callback(
