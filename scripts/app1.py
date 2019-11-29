@@ -22,7 +22,7 @@ def chart1():
         return {
             "config": {
                 "title": {
-                    "fontSize": 18,
+                    "fontSize": 16,
                     "font": font,
                     "anchor": "start", # equivalent of left-aligned.
                     "fontColor": "#000000"
@@ -38,12 +38,12 @@ def chart1():
                     "domainWidth": 1,
                     "grid": False,
                     "labelFont": font,
-                    "labelFontSize": 12,
+                    "labelFontSize": 10,
                     "labelAngle": 0, 
                     "tickColor": axisColor,
                     "tickSize": 5, # default, including it just to show you can change it
                     "titleFont": font,
-                    "titleFontSize": 16,
+                    "titleFontSize": 12,
                     "titlePadding": 10, # guessing, not specified in styleguide
                     "title": "X Axis Title (units)", 
                 },
@@ -53,11 +53,11 @@ def chart1():
                     "gridColor": gridColor,
                     "gridWidth": 1,
                     "labelFont": font,
-                    "labelFontSize": 12,
+                    "labelFontSize": 10,
                     "labelAngle": 0, 
                     #"ticks": False, # even if you don't have a "domain" you need to turn these off.
                     "titleFont": font,
-                    "titleFontSize": 16,
+                    "titleFontSize": 12,
                     "titlePadding": 10, # guessing, not specified in styleguide
                     "title": "Y Axis Title (units)", 
                     # titles are by default vertical left of axis so we need to hack this 
@@ -79,7 +79,7 @@ def chart1():
     hate_crime = pd.read_csv('..\data\crime_state_id_clean.csv')
 
     p1 =alt.Chart(states).mark_geoshape().encode(
-            alt.Color('avg_hatecrimes_per_100k_fbi:Q',title="Average hate crime per 100K"),
+            alt.Color('avg_hatecrimes_per_100k_fbi:Q',title='Average hate crime per 100K'),
             tooltip = [
                 alt.Tooltip('avg_hatecrimes_per_100k_fbi:Q', title = 'Average hate crime per 100K'),
                 alt.Tooltip('state:N')
@@ -88,7 +88,7 @@ def chart1():
             lookup='id',
             from_=alt.LookupData(hate_crime, 'id', ['avg_hatecrimes_per_100k_fbi','state'])
         ).project('albersUsa').properties(
-            title='Average hate crimes per 100K population in each state',
+            title='Average hate crimes per 100K population in US states',
             width=550,
             height=300)
     
@@ -115,12 +115,12 @@ def chart2(x_val = 'gini_index'):
                 'share_white_poverty': 'White people poverty rate',
                 'share_non_citizen': 'Percentage of Non-citizens',
                 'share_population_in_metro_areas': 'Percentage of people in metro cities'}
-                
+
     # Plot the data points on an interactive axis
     points = alt.Chart(df).mark_circle(color='black', size = 40, opacity = 0.6).encode(
         x=alt.X('x:Q', title=type_dict[x_val], scale = alt.Scale(domain = [min(df['x']),max(df['x'])])),
         y=alt.Y('y:Q', title='Average hate crime per 100K people'),
-        tooltip = 'state:O'
+        tooltip = [alt.Tooltip('state:O', title = "State")]
     )
 
     # Plot the best fit polynomials
@@ -129,14 +129,17 @@ def chart2(x_val = 'gini_index'):
         y='1:Q'
     )
     
-    return (points + polynomial_fit).properties(title = 'Hate crime rate across demographic factors', width = 450, height = 250)
+    return (points + polynomial_fit).properties(title = 'Hate crime rate across socio-economic factors', width = 450, height = 300)
 
-
+    
 app.layout = html.Div([ 
     ### Add Tabs to the top of the page
-    dcc.Tabs(id='tabs', value='tab1', children=[
+    html.H2('United States hate crimes analysis',
+            style = {'align':'center','font-family':'ariel,serif','font-size':'36px', 'font-color':'#ffffff'}
+    ),
+    dcc.Tabs(id='tabs', value='tab-1', children=[
         dcc.Tab(label='Hate Crimes on Average', value='tab-1'),
-        dcc.Tab(label='Hate Crimes in Elections ', value='tab-2'),
+        dcc.Tab(label='Hate Crimes in Elections', value='tab-2'),
     ]),    
 
     html.Div(id='tabs-content-example')
@@ -149,23 +152,32 @@ def render_content(tab = 'tab-1'):
     if tab == 'tab-1':
         return html.Div([
             html.H2('Analysis of Hate crime rates across demographic factors', 
-            style={'font-family':'ariel,serif','font-size':'32px'}),
+            style={'font-family':'ariel,serif','font-size':'28px'}),
             html.Div([ 
                 html.Iframe(
                     sandbox='allow-scripts',
                     id='plot1',
-                    height='500',
-                    width='1000',
+                    height='400',
+                    width='800',
                     style={'border-width':'0'},
                     ################ The magic happens here
                     srcDoc = chart1().to_html()
                     ################ The magic happens here
                     )],
-                    style={'display': 'inline-block', 'width': '55%', 'border-width':'0'}
+                    style={'display': 'inline-block', 'width': '58%', 'border-width':'0'}
             ),
-            html.Div([
-                html.H4('Choose the demographic factor on x -axis:'),
-                dcc.Dropdown(
+                html.Div([
+                    html.Iframe(
+                    sandbox='allow-scripts',
+                    id='chart2',
+                    height='400',
+                    width='565',
+                    style={'border-width': '0'},
+                    ################ The magic happens here
+                    srcDoc = chart2().to_html()
+                    ################ The magic happens here
+                ),
+               dcc.Dropdown(
                     id = 'dd-chart',
                     options = [
                         {'label': 'Income Disparity', 'value': 'gini_index'},
@@ -177,18 +189,8 @@ def render_content(tab = 'tab-1'):
                     value = 'gini_index',
                     style=dict(width = '70%',
                                 verticalAlign="middle")
-                ),
-                html.Iframe(
-                    sandbox='allow-scripts',
-                    id='chart2',
-                    height='500',
-                    width='1000',
-                    style={'border-width': '0'},
-                    ################ The magic happens here
-                    srcDoc = chart2().to_html()
-                    ################ The magic happens here
                 )],
-                style= {'display': 'inline-block','width': '45%', 'border-width':'0'}
+                style= {'display': 'inline-block','width': '42%', 'border-width':'0'}
             )             
         ])
     elif tab == 'tab-2':

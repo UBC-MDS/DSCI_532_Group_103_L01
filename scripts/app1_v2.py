@@ -4,10 +4,10 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 import altair as alt
+from altair import datum
 import vega_datasets
 import pandas as pd
 import numpy as np
-#import dash_canvas
 import dash_bootstrap_components as dbc
 
 app = dash.Dash(__name__, assets_folder='assets',external_stylesheets=[dbc.themes.CERULEAN])
@@ -24,7 +24,7 @@ def chart1():
         return {
             "config": {
                 "title": {
-                    "fontSize": 18,
+                    "fontSize": 16,
                     "font": font,
                     "anchor": "start", # equivalent of left-aligned.
                     "fontColor": "#000000"
@@ -40,12 +40,12 @@ def chart1():
                     "domainWidth": 1,
                     "grid": False,
                     "labelFont": font,
-                    "labelFontSize": 12,
+                    "labelFontSize": 10,
                     "labelAngle": 0, 
                     "tickColor": axisColor,
                     "tickSize": 5, # default, including it just to show you can change it
                     "titleFont": font,
-                    "titleFontSize": 16,
+                    "titleFontSize": 12,
                     "titlePadding": 10, # guessing, not specified in styleguide
                     "title": "X Axis Title (units)", 
                 },
@@ -55,11 +55,11 @@ def chart1():
                     "gridColor": gridColor,
                     "gridWidth": 1,
                     "labelFont": font,
-                    "labelFontSize": 12,
+                    "labelFontSize": 10,
                     "labelAngle": 0, 
                     #"ticks": False, # even if you don't have a "domain" you need to turn these off.
                     "titleFont": font,
-                    "titleFontSize": 16,
+                    "titleFontSize": 12,
                     "titlePadding": 10, # guessing, not specified in styleguide
                     "title": "Y Axis Title (units)", 
                     # titles are by default vertical left of axis so we need to hack this 
@@ -78,10 +78,10 @@ def chart1():
     from vega_datasets import data
 
     states = alt.topo_feature(data.us_10m.url, 'states')
-    hate_crime = pd.read_csv('../data/crime_state_id_clean.csv')
+    hate_crime = pd.read_csv('..\data\crime_state_id_clean.csv')
 
     p1 =alt.Chart(states).mark_geoshape().encode(
-            alt.Color('avg_hatecrimes_per_100k_fbi:Q',title="Average hate crime per 100K"),
+            alt.Color('avg_hatecrimes_per_100k_fbi:Q',title='Average hate crime per 100K', scale = alt.Scale(scheme='orangered')),
             tooltip = [
                 alt.Tooltip('avg_hatecrimes_per_100k_fbi:Q', title = 'Average hate crime per 100K'),
                 alt.Tooltip('state:N')
@@ -90,7 +90,7 @@ def chart1():
             lookup='id',
             from_=alt.LookupData(hate_crime, 'id', ['avg_hatecrimes_per_100k_fbi','state'])
         ).project('albersUsa').properties(
-            title='Average hate crimes per 100K population in each state',
+            title='Average hate crimes per 100K population in US states',
             width=550,
             height=300)
     
@@ -99,7 +99,7 @@ def chart1():
 
 def chart2(x_val = 'gini_index'):
 
-    df = pd.read_csv('../data/hate_crimes.csv').loc[:,[x_val,'avg_hatecrimes_per_100k_fbi','state']]
+    df = pd.read_csv('..\data\hate_crimes.csv').loc[:,[x_val,'avg_hatecrimes_per_100k_fbi','state']]
     df = df.dropna()
     
     df = pd.DataFrame({'x': df.iloc[:,0], 'y': df.iloc[:,1], 'state':df.iloc[:,2] })
@@ -117,12 +117,12 @@ def chart2(x_val = 'gini_index'):
                 'share_white_poverty': 'White people poverty rate',
                 'share_non_citizen': 'Percentage of Non-citizens',
                 'share_population_in_metro_areas': 'Percentage of people in metro cities'}
-                
+
     # Plot the data points on an interactive axis
     points = alt.Chart(df).mark_circle(color='black', size = 40, opacity = 0.6).encode(
         x=alt.X('x:Q', title=type_dict[x_val], scale = alt.Scale(domain = [min(df['x']),max(df['x'])])),
         y=alt.Y('y:Q', title='Average hate crime per 100K people'),
-        tooltip = 'state:O'
+        tooltip = [alt.Tooltip('state:O', title = "State")]
     )
 
     # Plot the best fit polynomials
@@ -131,45 +131,78 @@ def chart2(x_val = 'gini_index'):
         y='1:Q'
     )
     
-    return (points + polynomial_fit).properties(title = 'Hate crime rate across demographic factors', width = 450, height = 250)
+    return (points + polynomial_fit).properties(title = 'Hate crime rate across socio-economic factors', width = 450, height = 300)
+def graph3_4():
 
+    crime_data = pd.read_csv('..\data\hate_crimes.csv')
 
+    # Wrangling data
+    crime_data_n = crime_data
+
+    crime_data_n['avg_hatecrimes_fbi_10days'] = ((crime_data_n['avg_hatecrimes_per_100k_fbi']/365)*10)
+
+    crime_data_n['prop'] = (crime_data_n['hate_crimes_per_100k_splc'] - crime_data_n['avg_hatecrimes_fbi_10days'])/crime_data_n['avg_hatecrimes_fbi_10days']
+
+    mean_crime = crime_data_n['avg_hatecrimes_fbi_10days'].mean()
+
+    conditions = [
+        (crime_data_n['avg_hatecrimes_fbi_10days'] <= mean_crime ),
+        (crime_data_n['avg_hatecrimes_fbi_10days'] > mean_crime)]
+    choices = ['low baseline crime rate', 'high baseline crime rate']
+    crime_data_n['crime_rate_bracket'] = np.select(conditions, choices)
+    
+    crime_data_n['diff_hatecrime'] = (crime_data_n['hate_crimes_per_100k_splc'] - crime_data_n['avg_hatecrimes_fbi_10days'])
+    crime_data_sorted_trump = crime_data_n.sort_values(by='share_voters_voted_trump')
+
+    state_selector = alt.selection_multi(fields=['state'])
+
+    # Create the plots
+
+    l = alt.Chart(crime_data_n, title = "States with low baseline crime rate").mark_bar().encode(
+            alt.X('state:N', title = '', axis=alt.Axis(labelAngle = -45)),
+            alt.Y('prop:Q', title = 'Rate of change of hate crime pre and post election'),
+            color=alt.condition(state_selector, alt.ColorValue("steelblue"), alt.ColorValue("grey"))
+        ).transform_filter((datum.crime_rate_bracket == 'low baseline crime rate')).properties(width = 475,height = 200)
+
+    h = alt.Chart(crime_data_n, title = "States with high baseline crime rate").mark_bar().encode(
+            alt.X('state:N', axis=alt.Axis(labelAngle = -45),  title = ''),
+            alt.Y('prop:Q', title = 'Rate of change of hate crime pre and post election', scale=alt.Scale(domain=[0, 30])),
+            color=alt.condition(state_selector, alt.ColorValue("steelblue"), alt.ColorValue("grey"))
+        ).transform_filter((datum.crime_rate_bracket == 'high baseline crime rate')).properties(width = 450,height = 200)
+
+    heatmap = alt.Chart(crime_data_sorted_trump).mark_rect().encode(
+        alt.X('state', sort=None, title=" ", axis=alt.Axis(labelAngle = -45)),
+        alt.Y('share_voters_voted_trump', title="Share of Trump voters (%)"),
+        alt.Color('diff_hatecrime', title="Change in hate crime rate (%)", scale = alt.Scale(scheme='orangered')),
+        tooltip = [alt.Tooltip('state', title = 'State'),
+                   alt.Tooltip('hate_crimes_per_100k_splc', title = "Hate crime rate 10 days after election"),
+                   alt.Tooltip('avg_hatecrimes_fbi_10days', title = "Average rate of hate crime (for 10 days")]
+    ).properties(width = 950,height = 200).add_selection(state_selector)
+
+    return alt.vconcat(
+        heatmap,
+        l | h)
+
+    
 tabs_styles = {
     'height': '50px',
-    'width':'500px',
+    'width':'1300px',
     'marginLeft': 20
-}
-tab_style = {
-    'borderBottom': '1px solid #d6d6d6',
-    'padding': '6px',
-    'fontWeight': 'bold'
 }
 
 tab_selected_style = {
     'borderTop': '1px solid #d6d6d6',
-    'borderBottom': '1px solid #d6d6d6',
-    'backgroundColor': '#119DFF',
-    'color': 'white',
-    'padding': '6px'
+    'padding-left': '5px',
+    'padding-bottom': '10px',
+    
 }
 
 footer = dbc.Container([dbc.Row(dbc.Col(html.P('* Click on the bars to view the corresponding values'))),
                         ])
 
-app.layout = html.Div([
-#    html.Div(
-#
-#             id='header',
-#             className="banner",
-#             children =[html.H1("Hate crime analysis app", className="display-4")],
-##             style={
-##             "width": "100%",
-##             "alignItems": "center",
-##             "justifyContent": "space-between",
-##             "background": "#A2B1C6",
-##             "color": "#506784",
-##             },
-#             ),
+app.layout = html.Div([ 
+    ### Add Tabs to the top of the page
+    
     html.Div([dbc.Jumbotron([
                 dbc.Container([
                       html.H2("Hate crime analysis app"),
@@ -186,15 +219,14 @@ app.layout = html.Div([
 
     html.Div([
     ### Add Tabs to the top of the page
-    dcc.Tabs(id='tabs', value='tab1', children=[
-        dcc.Tab(label='Potential influencing factors', value='tab-1'),
-        dcc.Tab(label='Political election', value='tab-2'),
+    dcc.Tabs(id='tabs', value='tab-1', children=[
+        dcc.Tab(label='Scoio-Economic factors', value='tab-1'),
+        dcc.Tab(label='General Elections', value='tab-2'),
     ],style=tabs_styles),
 
-    html.Div(
-             id='tabs-content-example'),
+    html.Div(id='tabs-content-example')
     ])
-                      ])
+])
 
 
 @app.callback(Output('tabs-content-example', 'children'),
@@ -202,34 +234,37 @@ app.layout = html.Div([
 def render_content(tab = 'tab-1'):
     if tab == 'tab-1':
         return html.Div([
-            html.H1('Analysis of Hate crime rates across demographic factors',
-                    style={'font-family':'arial','font-size':'20px', 'padding-left':'500px', 'padding-top':'50px'}),
+            html.H2('Analysis of U.S hate crime rates from 2010-2015 ',
+                    style={'font-family':'arial','font-size':'20px', 'padding-left':'400px', 'padding-top':'50px'}),
             
-            html.P('THe hate crimes are not evenly distributed across all the states in the U.S.. Some states have much higher rates than others. This brings up a question that whether there are some factors asscoiated with the occurence of hate crimes. The analysis in this  section will help to approach this question.',
+            html.P('The hate crimes are not evenly distributed across all the states in the U.S. Some states have much higher rates than others. This brings up a question that whether there are some factors asscoiated with the occurence of hate crimes. The analysis in this  section will help to approach this question.',
                    style={'font-family':'arial','font-size':'16px', 'padding-left':'100px','padding-bottom':'40px',  'color':'black'}),
-                         
-#            dcc.Markdown('''
-#                 THe hate crime is not evenly distributed across all the states in the U.S.,
-#            '''),
-      
-            
-            html.Div([
+
+            html.Div([ 
                 html.Iframe(
                     sandbox='allow-scripts',
                     id='plot1',
-                    height='500',
-                    width='1000',
+                    height='400',
+                    width='800',
                     style={'border-width':'0'},
                     ################ The magic happens here
                     srcDoc = chart1().to_html()
                     ################ The magic happens here
                     )],
-                    style={'display': 'inline-block', 'width': '55%', 'border-width':'0'}
+                    style={'display': 'inline-block', 'width': '58%', 'border-width':'0'}
             ),
-            html.Div([
-                html.H1('Choose the demographic factor on x -axis:',
-                        style={'font-family':'arial','font-size':'18px', 'color':'black'}),
-                dcc.Dropdown(
+                html.Div([
+                    html.Iframe(
+                    sandbox='allow-scripts',
+                    id='chart2',
+                    height='400',
+                    width='565',
+                    style={'border-width': '0'},
+                    ################ The magic happens here
+                    srcDoc = chart2().to_html()
+                    ################ The magic happens here
+                ),
+               dcc.Dropdown(
                     id = 'dd-chart',
                     options = [
                         {'label': 'Income Disparity', 'value': 'gini_index'},
@@ -241,26 +276,28 @@ def render_content(tab = 'tab-1'):
                     value = 'gini_index',
                     style=dict(width = '70%',
                                 verticalAlign="middle")
-                ),
-                html.Iframe(
-                    sandbox='allow-scripts',
-                    id='chart2',
-                    height='500',
-                    width='1000',
-                    style={'border-width': '0'},
-                    ################ The magic happens here
-                    srcDoc = chart2().to_html()
-                    ################ The magic happens here
                 )],
-                style= {'display': 'inline-block','width': '45%', 'border-width':'0'}
-            ),
-                footer
-        ])
+                style= {'display': 'inline-block','width': '42%','height': '30px', 'border-width':'0'}
+            )             
+        ], style = tab_selected_style)
     elif tab == 'tab-2':
         return html.Div([
-            html.H3('Tab content 2'),
-            
-        ])
+                    html.H2('Change in hate crime rate with voting trend in 2016 U.S. election',
+                    style={'font-family':'arial','font-size':'20px', 'padding-left':'400px', 'padding-top':'50px'}),
+                    html.P('Summary',
+                    style={'font-family':'arial','font-size':'16px', 'padding-left':'100px','padding-bottom':'40px',  'color':'black'}),            
+                    html.Iframe(
+                        sandbox='allow-scripts',
+                        id='plot',
+                        height='1000',
+                        width='1300',
+                        style={'border-width': '0'},
+                        ################ The magic happens here
+                        srcDoc=graph3_4().to_html()
+                        ################ The magic happens here
+                    )    
+        ], style = tab_selected_style)
+
 
 @app.callback(
     dash.dependencies.Output('chart2', 'srcDoc'),
