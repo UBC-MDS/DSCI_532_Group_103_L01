@@ -78,7 +78,7 @@ def chart1():
     from vega_datasets import data
 
     states = alt.topo_feature(data.us_10m.url, 'states')
-    hate_crime = pd.read_csv('data\crime_state_id_clean.csv')
+    hate_crime = pd.read_csv('data/crime_state_id_clean.csv')
 
     p1 =alt.Chart(states).mark_geoshape().encode(
             alt.Color('avg_hatecrimes_per_100k_fbi:Q',title='Average hate crime per 100K', scale = alt.Scale(scheme='orangered')),
@@ -99,7 +99,7 @@ def chart1():
 
 def chart2(x_val = 'gini_index'):
 
-    df = pd.read_csv('data\hate_crimes.csv').loc[:,[x_val,'avg_hatecrimes_per_100k_fbi','state']]
+    df = pd.read_csv('data/hate_crimes.csv').loc[:,[x_val,'avg_hatecrimes_per_100k_fbi','state']]
     df = df.dropna()
     
     df = pd.DataFrame({'x': df.iloc[:,0], 'y': df.iloc[:,1], 'state':df.iloc[:,2] })
@@ -134,7 +134,7 @@ def chart2(x_val = 'gini_index'):
     return (points + polynomial_fit).properties(title = 'Hate crime rate across socio-economic factors', width = 400, height = 300)
 def graph3_4():
 
-    crime_data = pd.read_csv('data\hate_crimes.csv')
+    crime_data = pd.read_csv('data/hate_crimes.csv')
 
     # Wrangling data
     crime_data_n = crime_data
