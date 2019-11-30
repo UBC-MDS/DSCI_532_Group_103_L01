@@ -6,6 +6,8 @@
 * Sukriti Trehan
 * Subing Cao
 
+[Heroku App: U.S. Hate Crime Analysis](https://dsci-532-group-103-milestone2.herokuapp.com/)
+
 [Team Contract](https://github.ubc.ca/MDS-2019-20/DSCI_532_milestone1_saurav99/blob/master/Contract.md)
 
 ## Overview and Usage of the App
