@@ -26,7 +26,7 @@ The research questions we wish to explore from the U.S. hate crime dataset are:
 1. What is the trend of hate crime rates across the states of U.S.?
 2. What are the factors that may influence the rate of hate crimes across the country?
 3. Did change in hate crime rates post 2016 presidential elections depend on the proportion of Trump voters in a state?
-4. Was the change in hate crime rate post 2016 election higher or lower for states across lower and higher pre-election hate crime rates?
+4. What was the difference in rate of change of hate crime post 2016 election across states based on high/low pre-election rates?
 
 Anyone intersted in exploring the spread of hate crime across the United States, specifically for the purpose of security of citizens and visitors of the nation, or authorities from the law may make use of the dataset to understand potential factors that may influence rate of hate crime across the nation. The user can see the states with hate crime rates on both the, higher and lower end and compare the rate of hate crime in these states by hovering over the states to see more details about the count of these incidents. Moreover, in order to understand which factors may influence the hate crime rates across states, the user can select the factor of interest from a drop down menu and understand if there is a linear relationship with the rate of hate crimes. For instance, upon selecting income disparity, one may notice that it has a positively linear relation with hate crime rates and can also hover over the scatterpoints for more information about the state and variable values.
 
