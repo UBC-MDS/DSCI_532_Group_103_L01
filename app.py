@@ -235,11 +235,9 @@ app.layout = html.Div([
     
     html.Div([dbc.Jumbotron([
                 dbc.Container([
-                      html.H2("U.S. hate crime analysis"),
+                      html.H2("The U.S. Hate Crime Analysis"),
                       dcc.Markdown('''
-                    - Explore the relationship between potential demographic factors (income, unemployment, education, etc)  and hate crime rates
-                    
-                    - Investigte the changes of hate crime rates before and after political election
+                    Using this App, you can explore the relationship between different socio-economic factors (income, unemployment, education, etc) and hate crime rates. It can also be used to investigte the change of hate crime rates before and after the U.S. president election in 2016.
     '''),],#fluid=True,
                               )],
                                      fluid=True,
