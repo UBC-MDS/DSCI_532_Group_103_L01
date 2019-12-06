@@ -15,6 +15,8 @@ app.config['suppress_callback_exceptions'] = True
 
 server = app.server
 app.title = 'Dash app for DSCI 532 group - 103'
+
+# Chloropleth plot for tab 1
 def chart1():
     """
     Make a US map plot to show the average hate crime per 100K population in each state. Each state is colored by gradient according to the value of average hate crime per 100K populaiton
@@ -103,7 +105,7 @@ def chart1():
     
     return p1 
 
-
+#Scatter plot for tab 1 
 def chart2(x_val = 'gini_index'):
     """
     This function creates a chart for avg hate crime rate across a specified factor given as input.   
@@ -150,6 +152,8 @@ def chart2(x_val = 'gini_index'):
     )
     
     return (points + polynomial_fit).properties(title = 'Hate crime rate across socio-economic factors', width = 400, height = 300)
+
+# Plots for tab 2    
 def graph3_4():
     """
     Read and wrangles data from hate_crime.csv file and creates three plots 
@@ -190,20 +194,20 @@ def graph3_4():
 
     l = alt.Chart(crime_data_sorted_prop, title = "Rate of change of hate crimes across states with low baseline").mark_bar().encode(
             alt.X('state:N', sort=None, title = '', axis=alt.Axis(labelAngle = -45)),
-            alt.Y('prop:Q', title = 'Rate of change'),
+            alt.Y('prop:Q', title = 'Rate of change*'),
             color=alt.condition(state_selector, alt.ColorValue("steelblue"), alt.ColorValue("grey"))
         ).transform_filter((datum.crime_rate_bracket == 'low baseline crime rate')).properties(width = 475,height = 200)
 
     h = alt.Chart(crime_data_sorted_prop, title = "Rate of change of hate crimes across states with high baseline").mark_bar().encode(
             alt.X('state:N', sort=None, axis=alt.Axis(labelAngle = -45),  title = ''),
-            alt.Y('prop:Q', title = 'Rate of change', scale=alt.Scale(domain=[0, 30])),
+            alt.Y('prop:Q', title = 'Rate of change*', scale=alt.Scale(domain=[0, 30])),
             color=alt.condition(state_selector, alt.ColorValue("steelblue"), alt.ColorValue("grey"))
         ).transform_filter((datum.crime_rate_bracket == 'high baseline crime rate')).properties(width = 450,height = 200)
 
     heatmap = alt.Chart(crime_data_sorted_trump, title = 'Change in hate crime rate with voting trend during 2016 U.S. elections').mark_rect().encode(
         alt.X('state', sort=None, title=" ", axis=alt.Axis(labelAngle = -45)),
         alt.Y('share_voters_voted_trump', title="People who voted for Trump (%)"),
-        alt.Color('diff_hatecrime', title="Change in hate crime rate (%)", scale = alt.Scale(scheme='orangered')),
+        alt.Color('diff_hatecrime', title="Change in hate crime rate (%)*", scale = alt.Scale(scheme='orangered')),
         tooltip = [alt.Tooltip('state', title = 'State'),
                    alt.Tooltip('hate_crimes_per_100k_splc', title = "Hate crime rate 10 days after election"),
                    alt.Tooltip('avg_hatecrimes_fbi_10days', title = "Average rate of hate crime (for 10 days")]
@@ -226,13 +230,12 @@ tab_selected_style = {
     'padding-bottom': '100px',  
 }
 
-footer = dbc.Container([dbc.Row(dbc.Col(dcc.Markdown('''Note - In first graph- $Change in hate crime rate = post-election rate - pre-election rate$, \ 
-                                                \n In the second and third graphs, $Rate of change of hate crime rate = (post-election rate - \
-                                                pre-election rate) /pre-election rate$''', style = {'font-size': '12px'}))),
-                        ])
+footer = dcc.Markdown('''\* Note - In first graph- **Change in hate crime rate = (post-election rate - pre-election rate)**, 
+                        \n In the second and third graphs - **Rate of change of hate crime rate = (post-election rate - \
+                        pre-election rate) / pre-election rate** ''', style = {'font-size': '12px'})
 
 app.layout = html.Div([ 
-    ### Add Tabs to the top of the page
+    # Adding Summary and Description of dashboard to the top of the page
     
     html.Div([dbc.Jumbotron([
                 dbc.Container([
@@ -258,6 +261,7 @@ app.layout = html.Div([
 ])
 
 
+# Function to update tabs on clicking
 @app.callback(Output('tabs-content-example', 'children'),
               [Input('tabs', 'value')])
 def render_content(tab = 'tab-1'):
@@ -281,7 +285,7 @@ def render_content(tab = 'tab-1'):
             html.P('The hate crimes are not evenly distributed across all the states in the U.S. \
             Some states have much higher rates than others. This brings up a question that whether \
             there are some factors asscoiated with the occurence of hate crimes. The analysis in this \
-                section will help to approach this question.',
+            section will help to approach this question.',
                    style={'font-family':'arial','font-size':'16px', 'padding-left':'100px','padding-bottom':'40px',\
                         'color':'black'}),
 
@@ -309,7 +313,7 @@ def render_content(tab = 'tab-1'):
                     srcDoc = chart2().to_html()
                     ################ The magic happens here
                 ),
-                html.Div('Select factor for x-axis', 
+                html.Div('Select the socio-economic factor for x-axis', 
                         style={'font-family':'arial','font-size':'12px','color':'black'}),
                dcc.Dropdown(
                     id = 'dd-chart',
@@ -336,10 +340,11 @@ def render_content(tab = 'tab-1'):
                         conclusion can be made, it needs to be evaluated whether these changes were impacted by a state\'s voting trend \
                         The first bar-chart with heatmap shows all the states with change in hate crimes(post-election - pre-election) denoted \
                         by the color of the bar. In the bar charts below, the states were divided in 2 categories low and high baseline \
-                        where their pre-election crime rates were low and high respectively.',
+                        where their pre-election crime rates were low and high respectively. Hover over the bars to get information of the states \
+                        and their pre and post-election hate crime rates. Also clicking on any bar on the heatmap will highlight the same state \
+                        in either of the 2 charts for low and high-baseline crime rates.',
                     style={'font-family':'arial','font-size':'16px', 'padding-left':'100px','padding-bottom':'40px',  \
                         'color':'black'}),
-                    footer,
                     html.Iframe(
                         sandbox='allow-scripts',
                         id='plot',
@@ -349,7 +354,8 @@ def render_content(tab = 'tab-1'):
                         ################ The magic happens here
                         srcDoc=graph3_4().to_html()
                         ################ The magic happens here
-                    )    
+                    ),
+                    footer   
         ],style = {'borderTop': '1px solid #d6d6d6','padding-left':'5px'})
 
 
