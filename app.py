@@ -182,19 +182,20 @@ def graph3_4():
     
     crime_data_n['diff_hatecrime'] = (crime_data_n['hate_crimes_per_100k_splc'] - crime_data_n['avg_hatecrimes_fbi_10days'])
     crime_data_sorted_trump = crime_data_n.sort_values(by='share_voters_voted_trump')
+    crime_data_sorted_prop = crime_data_n.sort_values(by='prop')
 
     state_selector = alt.selection_multi(fields=['state'])
 
     # Create the plots
 
-    l = alt.Chart(crime_data_n, title = "Rate of change of hate crimes across states with low baseline").mark_bar().encode(
-            alt.X('state:N', title = '', axis=alt.Axis(labelAngle = -45)),
+    l = alt.Chart(crime_data_sorted_prop, title = "Rate of change of hate crimes across states with low baseline").mark_bar().encode(
+            alt.X('state:N', sort=None, title = '', axis=alt.Axis(labelAngle = -45)),
             alt.Y('prop:Q', title = 'Rate of change'),
             color=alt.condition(state_selector, alt.ColorValue("steelblue"), alt.ColorValue("grey"))
         ).transform_filter((datum.crime_rate_bracket == 'low baseline crime rate')).properties(width = 475,height = 200)
 
-    h = alt.Chart(crime_data_n, title = "Rate of change of hate crimes across states with high baseline").mark_bar().encode(
-            alt.X('state:N', axis=alt.Axis(labelAngle = -45),  title = ''),
+    h = alt.Chart(crime_data_sorted_prop, title = "Rate of change of hate crimes across states with high baseline").mark_bar().encode(
+            alt.X('state:N', sort=None, axis=alt.Axis(labelAngle = -45),  title = ''),
             alt.Y('prop:Q', title = 'Rate of change', scale=alt.Scale(domain=[0, 30])),
             color=alt.condition(state_selector, alt.ColorValue("steelblue"), alt.ColorValue("grey"))
         ).transform_filter((datum.crime_rate_bracket == 'high baseline crime rate')).properties(width = 450,height = 200)
