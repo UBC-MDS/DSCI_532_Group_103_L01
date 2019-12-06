@@ -133,10 +133,20 @@ def chart2(x_val = 'gini_index'):
     
     return (points + polynomial_fit).properties(title = 'Hate crime rate across socio-economic factors', width = 400, height = 300)
 def graph3_4():
-
+    """
+    Read and wrangles data from hate_crime.csv file and creates three 
+    plots (a heatmap and two bar charts) with interactivity among them.
+    
+    Returns
+    -------
+    plots
+        Three altait plots with interactivity among them
+    """
+    
     crime_data = pd.read_csv('data/hate_crimes.csv')
 
     # Wrangling data
+    
     crime_data_n = crime_data
 
     crime_data_n['avg_hatecrimes_fbi_10days'] = ((crime_data_n['avg_hatecrimes_per_100k_fbi']/365)*10)
