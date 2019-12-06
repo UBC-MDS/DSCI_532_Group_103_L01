@@ -16,7 +16,14 @@ app.config['suppress_callback_exceptions'] = True
 server = app.server
 app.title = 'Dash app for DSCI 532 group - 103'
 def chart1():
+    """
+    Make a US map plot to show the average hate crime per 100K population in each state. Each state is colored by gradient according to the value of average hate crime per 100K populaiton
+    ----------------
+    Returns:
+    A Choropleth U.S. map with states shaded according to the value of average hate crime per 100K populaiton
+    
 
+    """
     def mds_special():
         font = "Arial"
         axisColor = "#000000"
@@ -144,10 +151,21 @@ def chart2(x_val = 'gini_index'):
     
     return (points + polynomial_fit).properties(title = 'Hate crime rate across socio-economic factors', width = 400, height = 300)
 def graph3_4():
-
+    """
+    Read and wrangles data from hate_crime.csv file and creates three plots 
+    (a heatmap - for percentage of Trump voters across states and change in hate crime after 2016 elections, 
+    and two bar charts - for states divided on basis of pre-election hate crime rates) with interactivity among them.
+    
+    Returns
+    -------
+    plots
+        Three altait plots with interactivity among them
+    """
+    
     crime_data = pd.read_csv('data/hate_crimes.csv')
 
     # Wrangling data
+    
     crime_data_n = crime_data
 
     crime_data_n['avg_hatecrimes_fbi_10days'] = ((crime_data_n['avg_hatecrimes_per_100k_fbi']/365)*10)
@@ -164,26 +182,27 @@ def graph3_4():
     
     crime_data_n['diff_hatecrime'] = (crime_data_n['hate_crimes_per_100k_splc'] - crime_data_n['avg_hatecrimes_fbi_10days'])
     crime_data_sorted_trump = crime_data_n.sort_values(by='share_voters_voted_trump')
+    crime_data_sorted_prop = crime_data_n.sort_values(by='prop')
 
     state_selector = alt.selection_multi(fields=['state'])
 
     # Create the plots
 
-    l = alt.Chart(crime_data_n, title = "Rate of change of hate crimes across states with low baseline").mark_bar().encode(
-            alt.X('state:N', title = '', axis=alt.Axis(labelAngle = -45)),
+    l = alt.Chart(crime_data_sorted_prop, title = "Rate of change of hate crimes across states with low baseline").mark_bar().encode(
+            alt.X('state:N', sort=None, title = '', axis=alt.Axis(labelAngle = -45)),
             alt.Y('prop:Q', title = 'Rate of change'),
             color=alt.condition(state_selector, alt.ColorValue("steelblue"), alt.ColorValue("grey"))
         ).transform_filter((datum.crime_rate_bracket == 'low baseline crime rate')).properties(width = 475,height = 200)
 
-    h = alt.Chart(crime_data_n, title = "Rate of change of hate crimes across states with high baseline").mark_bar().encode(
-            alt.X('state:N', axis=alt.Axis(labelAngle = -45),  title = ''),
+    h = alt.Chart(crime_data_sorted_prop, title = "Rate of change of hate crimes across states with high baseline").mark_bar().encode(
+            alt.X('state:N', sort=None, axis=alt.Axis(labelAngle = -45),  title = ''),
             alt.Y('prop:Q', title = 'Rate of change', scale=alt.Scale(domain=[0, 30])),
             color=alt.condition(state_selector, alt.ColorValue("steelblue"), alt.ColorValue("grey"))
         ).transform_filter((datum.crime_rate_bracket == 'high baseline crime rate')).properties(width = 450,height = 200)
 
     heatmap = alt.Chart(crime_data_sorted_trump, title = 'Change in hate crime rate with voting trend during 2016 U.S. elections').mark_rect().encode(
         alt.X('state', sort=None, title=" ", axis=alt.Axis(labelAngle = -45)),
-        alt.Y('share_voters_voted_trump', title="Share of Trump voters (%)"),
+        alt.Y('share_voters_voted_trump', title="People who voted for Trump (%)"),
         alt.Color('diff_hatecrime', title="Change in hate crime rate (%)", scale = alt.Scale(scheme='orangered')),
         tooltip = [alt.Tooltip('state', title = 'State'),
                    alt.Tooltip('hate_crimes_per_100k_splc', title = "Hate crime rate 10 days after election"),
@@ -217,11 +236,9 @@ app.layout = html.Div([
     
     html.Div([dbc.Jumbotron([
                 dbc.Container([
-                      html.H2("U.S. hate crime analysis"),
+                      html.H2("U.S. Hate Crime Analysis"),
                       dcc.Markdown('''
-                    - Explore the relationship between potential demographic factors (income, unemployment, education, etc)  and hate crime rates
-                    
-                    - Investigte the changes of hate crime rates before and after political election
+                    Using this App, you can explore the relationship between different socio-economic factors (income, unemployment, education, etc) and hate crime rates. It can also be used to investigte the change of hate crime rates before and after the U.S. president election in 2016.
     '''),],#fluid=True,
                               )],
                                      fluid=True,
