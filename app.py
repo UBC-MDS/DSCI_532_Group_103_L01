@@ -151,10 +151,21 @@ def chart2(x_val = 'gini_index'):
     
     return (points + polynomial_fit).properties(title = 'Hate crime rate across socio-economic factors', width = 400, height = 300)
 def graph3_4():
-
+    """
+    Read and wrangles data from hate_crime.csv file and creates three plots 
+    (a heatmap - for percentage of Trump voters across states and change in hate crime after 2016 elections, 
+    and two bar charts - for states divided on basis of pre-election hate crime rates) with interactivity among them.
+    
+    Returns
+    -------
+    plots
+        Three altait plots with interactivity among them
+    """
+    
     crime_data = pd.read_csv('data/hate_crimes.csv')
 
     # Wrangling data
+    
     crime_data_n = crime_data
 
     crime_data_n['avg_hatecrimes_fbi_10days'] = ((crime_data_n['avg_hatecrimes_per_100k_fbi']/365)*10)
@@ -190,7 +201,7 @@ def graph3_4():
 
     heatmap = alt.Chart(crime_data_sorted_trump, title = 'Change in hate crime rate with voting trend during 2016 U.S. elections').mark_rect().encode(
         alt.X('state', sort=None, title=" ", axis=alt.Axis(labelAngle = -45)),
-        alt.Y('share_voters_voted_trump', title="Share of Trump voters (%)"),
+        alt.Y('share_voters_voted_trump', title="People who voted for Trump (%)"),
         alt.Color('diff_hatecrime', title="Change in hate crime rate (%)", scale = alt.Scale(scheme='orangered')),
         tooltip = [alt.Tooltip('state', title = 'State'),
                    alt.Tooltip('hate_crimes_per_100k_splc', title = "Hate crime rate 10 days after election"),
