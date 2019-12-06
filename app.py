@@ -105,7 +105,18 @@ def chart1():
 
 
 def chart2(x_val = 'gini_index'):
+    """
+    This function creates a chart for avg hate crime rate across a specified factor given as input.   
+    -------------------
 
+    Arguments:
+    x_val - The factor for which we want to compare the avg hate crime rate
+    -------------------
+
+    Returns:
+    A altair chart with the scatter plot for avg. hate crime rate and specified factor.
+
+    """
     df = pd.read_csv('data/hate_crimes.csv').loc[:,[x_val,'avg_hatecrimes_per_100k_fbi','state']]
     df = df.dropna()
     
@@ -240,6 +251,18 @@ app.layout = html.Div([
 @app.callback(Output('tabs-content-example', 'children'),
               [Input('tabs', 'value')])
 def render_content(tab = 'tab-1'):
+    """
+    This functions updates the values of the tab in our dashboard based on the click on a particular tab
+    ---------------------
+
+    Arguments :
+    tab - The value of the tab input from the callback function.
+    ---------------------
+
+    Returns :
+    A html div containing the all the updated plots
+
+    """
     if tab == 'tab-1':
         return html.Div([
             html.H2('Analysis of U.S hate crime rates from 2010-2015 ',
@@ -321,7 +344,18 @@ def render_content(tab = 'tab-1'):
     dash.dependencies.Output('chart2', 'srcDoc'),
     [dash.dependencies.Input('dd-chart', 'value')])
 def update_plot(xaxis_column_name):
+    """
+    This functions updates the scatter plot in tab 1 with user input from drop-down menu received from callback
+    ----------------
 
+    Arguments : 
+    xaxis_column_name - name of the factor in the with which the plot of avg. hate crime vs factor needs to be created
+    ----------------
+
+    Returns :
+    A function call to the plot creation function with user input of x-axis.
+
+    """
     updated_plot = chart2(xaxis_column_name).to_html()
     return updated_plot
 
