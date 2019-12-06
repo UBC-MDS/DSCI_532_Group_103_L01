@@ -1,4 +1,4 @@
-### Reflections for Milestone 3
+## Reflections for Milestone 3
 
 #### Summary of feedback received
 
