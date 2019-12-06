@@ -18,7 +18,11 @@ app.title = 'Dash app for DSCI 532 group - 103'
 def chart1():
     """
     Make a US map plot to show the average hate crime per 100K population in each state. Each state is colored by gradient according to the value of average hate crime per 100K populaiton
+    ----------------
+    Returns:
+    A Choropleth U.S. map with states shaded according to the value of average hate crime per 100K populaiton
     
+
     """
     def mds_special():
         font = "Arial"
