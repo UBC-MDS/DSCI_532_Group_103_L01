@@ -338,7 +338,8 @@ def render_content(tab = 'tab-1'):
                         by the color of the bar. In the bar charts below, the states were divided in 2 categories low and high baseline \
                         where their pre-election crime rates were low and high respectively.',
                     style={'font-family':'arial','font-size':'16px', 'padding-left':'100px','padding-bottom':'40px',  \
-                        'color':'black'}),            
+                        'color':'black'}),
+                    footer,
                     html.Iframe(
                         sandbox='allow-scripts',
                         id='plot',
@@ -348,8 +349,7 @@ def render_content(tab = 'tab-1'):
                         ################ The magic happens here
                         srcDoc=graph3_4().to_html()
                         ################ The magic happens here
-                    ),
-                    footer    
+                    )    
         ],style = {'borderTop': '1px solid #d6d6d6','padding-left':'5px'})
 
 
