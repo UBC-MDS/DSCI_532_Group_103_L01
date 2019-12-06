@@ -16,7 +16,10 @@ app.config['suppress_callback_exceptions'] = True
 server = app.server
 app.title = 'Dash app for DSCI 532 group - 103'
 def chart1():
-
+    """
+    Make a US map plot to show the average hate crime per 100K population in each state. Each state is colored by gradient according to the value of average hate crime per 100K populaiton
+    
+    """
     def mds_special():
         font = "Arial"
         axisColor = "#000000"
