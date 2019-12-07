@@ -23,5 +23,9 @@ To explore the change of hate crime rates and its plausible relation with the vo
 
 <img src='imgs/Tab 2.png' width = 800, height = 450>
 
+The following screenshot details a summary of R codes and plots that have been prepared for the R version of this app.
+
+<img src='imgs/progress.png' width = 800, height = 450>
+
 
 **Note** - *This app is build using Dash which supports Python and R.*
